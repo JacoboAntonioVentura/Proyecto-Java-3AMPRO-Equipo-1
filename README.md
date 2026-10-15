@@ -1,12 +1,10 @@
-# Proyecto-Java-3AMPRO-Equipo-1
-Proyecto de gimnasio
 package bienvenidos;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.ArrayList; // Importación para arreglos dinámicos
-import java.io.FileWriter;   // Importación para manejo de archivos
+import java.util.ArrayList;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
 
@@ -16,20 +14,26 @@ public class MembresiaGymImage {
 
         URL url = MembresiaGymImage.class.getResource("Gym1.png");
 
-        ImageIcon icono = new ImageIcon(url);
-        Image img = icono.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-        icono = new ImageIcon(img);
-        
-        UIManager.put("OptionPane.background", new Color(45, 45, 45)); 
-        UIManager.put("Panel.background", new Color(70, 70, 70));     
+        ImageIcon icono = null;
+        if (url != null) {
+            ImageIcon original = new ImageIcon(url);
+            Image img = original.getImage().getScaledInstance(
+                    80, 80, Image.SCALE_SMOOTH);
+            icono = new ImageIcon(img);
+        }
+
+        UIManager.put("OptionPane.background", new Color(45, 45, 45));
+        UIManager.put("Panel.background", new Color(70, 70, 70));
         UIManager.put("OptionPane.messageForeground", Color.WHITE);
-        
+
         double mensualidad = 450;
 
-        // ARREGLO / COLECCIÓN: Guardará el historial de transacciones de la sesión
         ArrayList<String> historialTransacciones = new ArrayList<>();
 
+        ArrayList<String> historialRutinas = new ArrayList<>();
+
         String nombre = entrada("Ingresa tu nombre:", "Inicio", icono);
+
         if (nombre == null || nombre.trim().isEmpty()) {
             nombre = "Cliente";
         }
@@ -50,13 +54,15 @@ public class MembresiaGymImage {
                     8. Rutina de pierna
                     9. Ver historial de pagos (Arreglo)
                     10. Salir y guardar (Archivo)
+                    11. Ver historial de rutinas
                     """, "Menú", icono);
-       
+
             if (op == null) {
                 break;
             }
 
             int opcion;
+
             try {
                 opcion = Integer.parseInt(op);
             } catch (NumberFormatException e) {
@@ -67,48 +73,93 @@ public class MembresiaGymImage {
             if (opcion == 1) {
 
                 mensaje("Mensualidad: $" + mensualidad, icono);
+
                 double total = mensualidad;
                 String metodo = metodoPago(total, icono);
+
                 if (metodo != null) {
-                    historialTransacciones.add("Cliente: " + nombre + " - Pago Mensual: $" + total + " (" + metodo + ")");
+                    historialTransacciones.add(
+                            "Cliente: " + nombre
+                            + " - Pago Mensual: $" + total
+                            + " (" + metodo + ")");
                 }
 
             } else if (opcion == 2) {
 
                 double total = mensualidad * 12 * 0.8;
+
                 mensaje("Total anual con descuento: $" + total, icono);
+
                 String metodo = metodoPago(total, icono);
+
                 if (metodo != null) {
-                    historialTransacciones.add("Cliente: " + nombre + " - Pago Anual: $" + total + " (" + metodo + ")");
+                    historialTransacciones.add(
+                            "Cliente: " + nombre
+                            + " - Pago Anual: $" + total
+                            + " (" + metodo + ")");
                 }
 
             } else if (opcion == 3) {
 
                 String d = entrada("Días de retraso:", "Entrada", icono);
+
                 if (d != null) {
-                    int dias = Integer.parseInt(d);
-                    if (dias > 0) {
-                        double total = mensualidad + (mensualidad * 0.10);
-                        mensaje("Total con recargo: $" + total, icono);
-                        String metodo = metodoPago(total, icono);
-                        if (metodo != null) {
-                            historialTransacciones.add("Cliente: " + nombre + " - Pago con Recargo (" + dias + " días): $" + total + " (" + metodo + ")");
+                    try {
+                        int dias = Integer.parseInt(d);
+
+                        if (dias > 0) {
+                            double total = mensualidad
+                                    + (mensualidad * 0.10);
+
+                            mensaje("Total con recargo: $" + total, icono);
+
+                            String metodo = metodoPago(total, icono);
+
+                            if (metodo != null) {
+                                historialTransacciones.add(
+                                        "Cliente: " + nombre
+                                        + " - Pago con Recargo (" + dias
+                                        + " días): $" + total
+                                        + " (" + metodo + ")");
+                            }
+                        } else {
+                            mensaje("No hay recargo", icono);
                         }
-                    } else {
-                        mensaje("No hay recargo", icono);
+
+                    } catch (NumberFormatException e) {
+                        mensaje("Ingresa un número válido de días.", icono);
                     }
                 }
 
             } else if (opcion == 4) {
 
                 String h = entrada("Horas de entrenador:", "Entrada", icono);
+
                 if (h != null) {
-                    int horas = Integer.parseInt(h);
-                    double total = horas * 200;
-                    mensaje("Total entrenador: $" + total, icono);
-                    String metodo = metodoPago(total, icono);
-                    if (metodo != null) {
-                        historialTransacciones.add("Cliente: " + nombre + " - Entrenador (" + horas + " hrs): $" + total + " (" + metodo + ")");
+                    try {
+                        int horas = Integer.parseInt(h);
+
+                        if (horas <= 0) {
+                            mensaje("Las horas deben ser mayores que cero.", icono);
+                            continue;
+                        }
+
+                        double total = horas * 200;
+
+                        mensaje("Total entrenador: $" + total, icono);
+
+                        String metodo = metodoPago(total, icono);
+
+                        if (metodo != null) {
+                            historialTransacciones.add(
+                                    "Cliente: " + nombre
+                                    + " - Entrenador (" + horas
+                                    + " hrs): $" + total
+                                    + " (" + metodo + ")");
+                        }
+
+                    } catch (NumberFormatException e) {
+                        mensaje("Ingresa un número válido de horas.", icono);
                     }
                 }
 
@@ -116,6 +167,9 @@ public class MembresiaGymImage {
 
                 URL brazoURL = MembresiaGymImage.class.getResource("Brazo.jpg");
                 ImageIcon brazoIcon = getScaledIcon(brazoURL);
+
+                historialRutinas.add("Rutina de brazo");
+
                 mensaje("""
                         RUTINA DE BRAZO
                         1. Curl de bíceps - 4x12
@@ -128,18 +182,26 @@ public class MembresiaGymImage {
 
                 URL hombroURL = MembresiaGymImage.class.getResource("Hombro.jpg");
                 ImageIcon hombroIcon = getScaledIcon(hombroURL);
+
+                // NUEVO: Registrar la rutina consultada
+                historialRutinas.add("Rutina de hombro");
+
                 mensaje("""
                         RUTINA DE HOMBRO
                         1. Press militar - 4x10
                         2. Elevaciones laterales - 4x12
-                        2. Elevaciones frontales - 4x12
-                        4. Extension con polea - 4x15
+                        3. Elevaciones frontales - 4x12
+                        4. Extensión con polea - 4x15
                         """, hombroIcon);
 
             } else if (opcion == 7) {
 
                 URL pechoURL = MembresiaGymImage.class.getResource("Pecho.png");
                 ImageIcon pechoIcon = getScaledIcon(pechoURL);
+
+                // NUEVO: Registrar la rutina consultada
+                historialRutinas.add("Rutina de pecho");
+
                 mensaje("""
                         RUTINA DE PECHO
                         1. Press banca - 4x10
@@ -152,6 +214,9 @@ public class MembresiaGymImage {
 
                 URL piernaURL = MembresiaGymImage.class.getResource("Pierna.png");
                 ImageIcon piernaIcon = getScaledIcon(piernaURL);
+
+                historialRutinas.add("Rutina de pierna");
+
                 mensaje("""
                         RUTINA DE PIERNA
                         1. Sentadilla - 4x12
@@ -161,22 +226,45 @@ public class MembresiaGymImage {
                         """, piernaIcon);
 
             } else if (opcion == 9) {
-                // MOSTRAR HISTORIAL DESDE EL ARREGLO
+
                 if (historialTransacciones.isEmpty()) {
                     mensaje("No hay transacciones registradas aún.", icono);
                 } else {
-                    StringBuilder sb = new StringBuilder("---- HISTORIAL DE TRANSACCIONES ----\n\n");
+                    StringBuilder sb = new StringBuilder(
+                            "---- HISTORIAL DE TRANSACCIONES ----\n\n");
+
                     for (String transaccion : historialTransacciones) {
                         sb.append("- ").append(transaccion).append("\n");
                     }
+
                     mensaje(sb.toString(), icono);
                 }
 
             } else if (opcion == 10) {
-                // GUARDAR EN ARCHIVO Y SALIR
+
                 guardarHistorialEnArchivo(historialTransacciones);
-                mensaje("Saliste del programa. Historial guardado en 'historial_gimnasio.txt'.", icono);
+
+                mensaje(
+                        "Saliste del programa. Historial guardado en "
+                        + "'historial_gimnasio.txt'.",
+                        icono);
+
                 break;
+
+            } else if (opcion == 11) {
+
+                if (historialRutinas.isEmpty()) {
+                    mensaje("No has consultado ninguna rutina.", icono);
+                } else {
+                    StringBuilder sb = new StringBuilder(
+                            "---- HISTORIAL DE RUTINAS ----\n\n");
+
+                    for (String rutina : historialRutinas) {
+                        sb.append("- ").append(rutina).append("\n");
+                    }
+
+                    mensaje(sb.toString(), icono);
+                }
 
             } else {
                 mensaje("Opción inválida", icono);
@@ -194,7 +282,9 @@ public class MembresiaGymImage {
         );
     }
 
-    public static String entrada(String texto, String titulo, ImageIcon icono) {
+    public static String entrada(
+            String texto, String titulo, ImageIcon icono) {
+
         return (String) JOptionPane.showInputDialog(
                 null,
                 texto,
@@ -207,44 +297,68 @@ public class MembresiaGymImage {
     }
 
     public static String metodoPago(double total, ImageIcon icono) {
+
         String op = entrada("""
                 ¿Cómo deseas pagar?
                 1. Efectivo
                 2. Tarjeta
                 """, "Pago", icono);
 
-        if (op == null) return null;
+        if (op == null) {
+            return null;
+        }
 
-        int opcion = Integer.parseInt(op);
+        try {
+            int opcion = Integer.parseInt(op);
 
-        if (opcion == 1) {
-            mensaje("Pagaste en efectivo\nTotal: $" + total, icono);
-            return "Efectivo";
-        } else if (opcion == 2) {
-            mensaje("Pagaste con tarjeta\nTotal: $" + total, icono);
-            return "Tarjeta";
-        } else {
-            mensaje("Opción no válida", icono);
+            if (opcion == 1) {
+                mensaje("Pagaste en efectivo\nTotal: $" + total, icono);
+                return "Efectivo";
+
+            } else if (opcion == 2) {
+                mensaje("Pagaste con tarjeta\nTotal: $" + total, icono);
+                return "Tarjeta";
+
+            } else {
+                mensaje("Opción no válida", icono);
+                return null;
+            }
+
+        } catch (NumberFormatException e) {
+            mensaje("Ingresa una opción de pago válida.", icono);
             return null;
         }
     }
 
-    // Método auxiliar para reescalar imágenes de manera limpia
     public static ImageIcon getScaledIcon(URL url) {
-        if (url == null) return null;
-        return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH));
+
+        if (url == null) {
+            return null;
+        }
+
+        Image imagen = new ImageIcon(url).getImage()
+                .getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+
+        return new ImageIcon(imagen);
     }
 
-    // MÉTODO PARA MANEJO DE ARCHIVOS
-    public static void guardarHistorialEnArchivo(ArrayList<String> historial) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("historial_gimnasio.txt", true))) {
+    public static void guardarHistorialEnArchivo(
+            ArrayList<String> historial) {
+
+        try (PrintWriter writer = new PrintWriter(
+                new FileWriter("historial_gimnasio.txt", true))) {
+
             writer.println("=== NUEVA SESIÓN DE REGISTROS ===");
+
             for (String item : historial) {
                 writer.println(item);
             }
+
             writer.println("----------------------------------------\n");
+
         } catch (IOException e) {
-            System.err.println("Error al guardar el archivo: " + e.getMessage());
+            System.err.println(
+                    "Error al guardar el archivo: " + e.getMessage());
         }
     }
 }
