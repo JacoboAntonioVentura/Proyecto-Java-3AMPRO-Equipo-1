@@ -1,3 +1,4 @@
+
 package bienvenidos;
 
 import javax.swing.*;
@@ -29,7 +30,6 @@ public class MembresiaGymImage {
         double mensualidad = 450;
 
         ArrayList<String> historialTransacciones = new ArrayList<>();
-
         ArrayList<String> historialRutinas = new ArrayList<>();
 
         String nombre = entrada("Ingresa tu nombre:", "Inicio", icono);
@@ -52,8 +52,8 @@ public class MembresiaGymImage {
                     6. Rutina de hombro
                     7. Rutina de pecho
                     8. Rutina de pierna
-                    9. Ver historial de pagos (Arreglo)
-                    10. Salir y guardar (Archivo)
+                    9. Ver historial de pagos
+                    10. Salir y guardar
                     11. Ver historial de rutinas
                     """, "Menú", icono);
 
@@ -183,7 +183,6 @@ public class MembresiaGymImage {
                 URL hombroURL = MembresiaGymImage.class.getResource("Hombro.jpg");
                 ImageIcon hombroIcon = getScaledIcon(hombroURL);
 
-                // NUEVO: Registrar la rutina consultada
                 historialRutinas.add("Rutina de hombro");
 
                 mensaje("""
@@ -199,7 +198,6 @@ public class MembresiaGymImage {
                 URL pechoURL = MembresiaGymImage.class.getResource("Pecho.png");
                 ImageIcon pechoIcon = getScaledIcon(pechoURL);
 
-                // NUEVO: Registrar la rutina consultada
                 historialRutinas.add("Rutina de pecho");
 
                 mensaje("""
@@ -231,7 +229,7 @@ public class MembresiaGymImage {
                     mensaje("No hay transacciones registradas aún.", icono);
                 } else {
                     StringBuilder sb = new StringBuilder(
-                            "---- HISTORIAL DE TRANSACCIONES ----\n\n");
+                            "---- HISTORIAL DE PAGOS ----\n\n");
 
                     for (String transaccion : historialTransacciones) {
                         sb.append("- ").append(transaccion).append("\n");
@@ -242,14 +240,25 @@ public class MembresiaGymImage {
 
             } else if (opcion == 10) {
 
-                guardarHistorialEnArchivo(historialTransacciones);
+                int confirmar = JOptionPane.showConfirmDialog(
+                        null,
+                        "¿Deseas salir y guardar los historiales?",
+                        "Confirmar salida",
+                        JOptionPane.YES_NO_OPTION
+                );
 
-                mensaje(
-                        "Saliste del programa. Historial guardado en "
-                        + "'historial_gimnasio.txt'.",
-                        icono);
+                if (confirmar == JOptionPane.YES_OPTION) {
 
-                break;
+                    guardarHistorialEnArchivo(
+                            historialTransacciones, historialRutinas);
+
+                    mensaje(
+                            "Saliste del programa. Historial guardado en "
+                            + "'historial_gimnasio.txt'.",
+                            icono);
+
+                    break;
+                }
 
             } else if (opcion == 11) {
 
@@ -343,22 +352,28 @@ public class MembresiaGymImage {
     }
 
     public static void guardarHistorialEnArchivo(
-            ArrayList<String> historial) {
+            ArrayList<String> historial,
+            ArrayList<String> rutinas) {
 
         try (PrintWriter writer = new PrintWriter(
                 new FileWriter("historial_gimnasio.txt", true))) {
 
             writer.println("=== NUEVA SESIÓN DE REGISTROS ===");
 
+            writer.println("HISTORIAL DE PAGOS:");
             for (String item : historial) {
                 writer.println(item);
             }
 
-            writer.println("----------------------------------------\n");
+            writer.println("HISTORIAL DE RUTINAS:");
+            for (String rutina : rutinas) {
+                writer.println(rutina);
+            }
+
+            writer.println("----------------------------------------");
 
         } catch (IOException e) {
-            System.err.println(
-                    "Error al guardar el archivo: " + e.getMessage());
+            mensaje("Error al guardar el archivo: " + e.getMessage(), null);
         }
     }
 }
